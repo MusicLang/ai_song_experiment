@@ -1,28 +1,28 @@
 import os
-from musiclang import Score
-from musiclang.library import *
 import numpy as np
-import glob
 import json
 import shutil
-from code.jukebox import manipulate, mix_songs
-from code.ml import create_best_variations
 import transformers
+
+from musiclang import Score
+from musiclang.library import *
+
+from app.jukebox import manipulate, mix_songs
+from app.ml import create_best_variations
 
 SEED = 100
 np.random.seed(SEED)
 # Configure same seed for huggingface
 transformers.set_seed(SEED)
 
-LOAD_FROM = 'midi'
-#LOAD_FROM = 'msl'
-DATA_DIR = 'data/experiment'
-FILES_DIR = 'data/midi_files'
+CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+DATA_DIR = os.path.join(CURRENT_DIR, 'data/experiment')
 
 ## CHANGE HERE TO SELECT MIDI_FILES
-path_orchestration = "submission_files/Final_Fantasy_7/prelude.mid"  # Get the bass drums and the most dense instrument
-path_melody = "submission_files/Rayman/rayman-bandland.mid"  # Get instruments in the high range (above median of mean pitch)
-path_chords = "submission_files/Silent_Hill/SilentHillTheme.mid"  # Get only the chords of the song
+path_orchestration = os.path.join(CURRENT_DIR, "submission_files/Final_Fantasy_7/prelude.mid")  # Get the bass drums and the most dense instrument
+path_melody = os.path.join(CURRENT_DIR, "submission_files/Rayman/rayman-bandland.mid") # Get instruments in the high range (above median of mean pitch)
+path_chords = os.path.join(CURRENT_DIR, "submission_files/Silent_Hill/SilentHillTheme.mid") # Get only the chords of the song
 
 base_dir = DATA_DIR
 
@@ -45,7 +45,6 @@ score_chords = Score.from_midi(path_chords, quantization=8, fast_chord_inference
 score_final = score.project_with_voice_leading_on_chord_score(score_chords, fixed_bass=True)
 
 score_final.to_midi(os.path.join(base_dir, 'output_final.mid'), one_track_per_instrument=False)
-
 
 
 # Save all variations as well
